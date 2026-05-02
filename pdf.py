@@ -1,29 +1,32 @@
 from pypdf import PdfReader, PdfWriter
+from typing import List
 from os import makedirs, path
 
 class PDF():
     def __init__(self, path: str) -> None:
         self.path = path
         self.reader = PdfReader(self.path)
+        self.writers = {}
+        self.writer = PdfWriter()
 
-    def split(self, output_folder: str = ".", start: int = 0, end: int = None) -> None:
+    def split(self, writer_name: str, start: int = 0, end: int = None) -> None:
         if end is None:
             end = len(self.reader.pages)
 
+        for _, page in enumerate(self.reader.pages[start:end]):
+            self.writers[writer_name] = PdfWriter()
+            self.writers[writer_name].add_page(page)
+
+    def join(self, writers: List[str]) -> None:
+        for writer_name in writers:
+            for page in self.writers[writer_name].pages:
+                self.writer.add_page(page)
+
+    def save(self, filename: str, output_folder: str = ".")  -> None:
         if not path.exists(output_folder):
             makedirs(output_folder)
 
-        for index, page in enumerate(self.reader.pages[start:end]):
-            writer = PdfWriter()
-            writer.add_page(page)
-            
-            output_filename = f"{output_folder}/page_{index + 1}.pdf"
-            with open(output_filename, "wb") as out:
-                writer.write(out)
-            print(f"Created: {output_filename}")
-
-# Criando uma instância da classe PDF com o arquivo "gato-xadrez.pdf"
-pdf = PDF("gato-xadrez.pdf")
-
-# Separando apenas a primeira página do PDF
-pdf.split(output_folder="gato-xadrez-pages", start=0, end=1)
+        output_filename = f"{output_folder}/{filename}.pdf"
+        with open(output_filename, "wb") as out:
+            self.writer.write(out)
+        print(f"Created: {output_filename}")
