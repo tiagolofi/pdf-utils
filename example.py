@@ -20,6 +20,8 @@ pdf.split('gato-preto', 21, 22)
 pdf.split('gato-branco', 23, 24)
 pdf.split('gato-xadrez', 24, 25)
 
+pdf.save("apenas-gatos-sem-reordenacao", output_folder="gato-xadrez")
+
 pdf.join([
     'capa', 
     # juntando gatos monocromáticos

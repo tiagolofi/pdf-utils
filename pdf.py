@@ -7,7 +7,7 @@ class PDF():
         self.path = path
         self.reader = PdfReader(self.path)
         self.writers = {}
-        self.writer = PdfWriter()
+        self.writer = None
 
     def split(self, writer_name: str, start: int = 0, end: int = None) -> None:
         if end is None:
@@ -18,11 +18,20 @@ class PDF():
             self.writers[writer_name].add_page(page)
 
     def join(self, writers: List[str]) -> None:
+        if self.writer is None:
+            self.writer = PdfWriter()
+
         for writer_name in writers:
             for page in self.writers[writer_name].pages:
                 self.writer.add_page(page)
 
     def save(self, filename: str, output_folder: str = ".")  -> None:
+        if self.writer is None:
+            self.writer = PdfWriter()
+            for writer in self.writers.values():
+                for page in writer.pages:
+                    self.writer.add_page(page)
+
         if not path.exists(output_folder):
             makedirs(output_folder)
 
